@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 pydicom = "*"
 pyside2 = "*"
+pyinstaller = "*"
 
 [requires]
 python_version = "3.7"
