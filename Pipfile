@@ -6,10 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-pyside2 = "*"
 pydicom = "*"
-py2exe = "*"
-pyinstaller = "*"
+pyside2 = "*"
 
 [requires]
 python_version = "3.7"

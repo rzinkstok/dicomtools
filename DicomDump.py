@@ -10,7 +10,9 @@ class DicomDumpApp(QtWidgets.QMainWindow):
 		self.filename = dcmfile
 		self.dataset = None
 		self.ancestors = []
-		
+		self.searchresults = []
+		self.currentsearchresult = None
+
 		if self.filename:
 			self.openFile()
 		
@@ -55,7 +57,7 @@ class DicomDumpApp(QtWidgets.QMainWindow):
 		
 		slayout.addStretch(1)
 		
-		savebutton = QtWidgets.QPushButton("Save to file...")
+		savebutton = QtWidgets.QPushButton("Save as txt...")
 		savebutton.clicked.connect(self.save)
 		slayout.addWidget(savebutton)
 		qbutton = QtWidgets.QPushButton("Quit")
@@ -191,6 +193,8 @@ class DicomDumpApp(QtWidgets.QMainWindow):
 			self.sresultlabel.setText("%d/%d" % (0, len(self.searchresults)))
 	
 	def prevResult(self):
+		if not self.searchresults:
+			return
 		self.searchresults[self.currentsearchresult].setSelected(False)
 		if self.currentsearchresult == 0:
 			self.currentsearchresult = len(self.searchresults)-1
@@ -201,6 +205,8 @@ class DicomDumpApp(QtWidgets.QMainWindow):
 		self.sresultlabel.setText("%d/%d" % (self.currentsearchresult+1, len(self.searchresults)))
 		
 	def nextResult(self):
+		if not self.searchresults:
+			return
 		self.searchresults[self.currentsearchresult].setSelected(False)
 		if self.currentsearchresult == len(self.searchresults)-1:
 			self.currentsearchresult = 0
