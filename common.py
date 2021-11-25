@@ -68,7 +68,8 @@ class Series(object):
         return self.instances[instance.uid]
 
     def __repr__(self):
-        return f"Series({self.modality}, {self.uid}, {self.description}, {self.patient_position}, {self.date} {self.time})"
+        return f"Series({self.modality}, {self.uid}, {self.description}, " \
+               f"{self.patient_position}, {self.date} {self.time})"
 
 
 class Instance(object):
@@ -88,11 +89,11 @@ def get_uid():
     return RZI_PREFIX + datetime.datetime.now().strftime("%Y%m%d.%H%M%S.%f") + '.' + str(os.getpid())
 
 
-def select(list, item="item"):
-    for i, v in enumerate(list):
+def select(items, item="item"):
+    for i, v in enumerate(items):
         print(f"{i+1}: {v}")
     n = int(input(f"Select {item}: ")) - 1
-    return list[n]
+    return items[n]
 
 
 def select_series(datadir):
@@ -109,7 +110,7 @@ def select_series(datadir):
             patient = Patient(d)
         study = patient.add_study(Study(d))
         series = study.add_series(Series(d))
-        instance = series.add_instance(Instance(d, fpath))
+        _ = series.add_instance(Instance(d, fpath))
 
     print(patient)
     study = select(list(patient.studies.values()), "study")

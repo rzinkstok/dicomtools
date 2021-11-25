@@ -1,4 +1,3 @@
-import pydicom
 import os
 from common import select_series, select, get_uid
 
