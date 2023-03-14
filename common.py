@@ -6,6 +6,13 @@ RZI_PREFIX = '1.2.826.0.1.3680043.8.1200.'
 IGNORE_DIRS = ["dbase", "incoming", "printer_files"]
 
 
+def list_patients(datadir):
+    patients = [x for x in os.listdir(datadir) if x not in IGNORE_DIRS]
+    for i, v in enumerate(patients):
+        print(f"{i + 1}: {v}")
+    return patients
+
+
 class Patient(object):
     def __init__(self, d):
         self.patient_id = d.PatientID
@@ -18,6 +25,11 @@ class Patient(object):
         if study.uid not in self.studies:
             self.studies[study.uid] = study
         return self.studies[study.uid]
+
+    def list_studies(self):
+        for i, v in enumerate(self.studies):
+            print(f"{i + 1}: {v}")
+        return list(self.studies.values())
 
     def __repr__(self):
         return f"Patient({self.patient_id}, {self.patient_name}, {self.date_of_birth}, {self.sex})"
@@ -39,6 +51,11 @@ class Study(object):
             self.series[series.uid] = series
         return self.series[series.uid]
 
+    def list_series(self):
+        for i, v in enumerate(self.series.values()):
+            print(f"{i + 1}: {v.modality} {v.uid} {v.description}")
+        return list(self.series.values())
+
     def __repr__(self):
         return f"Study({self.uid}, {self.description}, {self.date} {self.time})"
 
@@ -46,7 +63,10 @@ class Study(object):
 class Series(object):
     def __init__(self, d):
         self.uid = d.SeriesInstanceUID
-        self.description = d.SeriesDescription
+        try:
+            self.description = d.SeriesDescription
+        except AttributeError:
+            self.description = ''
         try:
             self.date = d.SeriesDate
         except AttributeError:
@@ -67,6 +87,11 @@ class Series(object):
             self.instances[instance.uid] = instance
         return self.instances[instance.uid]
 
+    def list_instances(self):
+        for i, v in enumerate(self.instances):
+            print(f"{i + 1}: {v}")
+        return list(self.instances.values())
+
     def __repr__(self):
         return f"Series({self.modality}, {self.uid}, {self.description}, " \
                f"{self.patient_position}, {self.date} {self.time})"
@@ -86,18 +111,17 @@ class Instance(object):
 
 
 def get_uid():
-    return RZI_PREFIX + datetime.datetime.now().strftime("%Y%m%d.%H%M%S.%f") + '.' + str(os.getpid())
+    return RZI_PREFIX + datetime.datetime.now().strftime("%Y%m%d.%H%M%S.%f") # + '.' + str(os.getpid())
 
 
 def select(items, item="item"):
-    for i, v in enumerate(items):
-        print(f"{i+1}: {v}")
     n = int(input(f"Select {item}: ")) - 1
     return items[n]
 
 
-def select_series(datadir):
-    patient_id = select([x for x in os.listdir(datadir) if x not in IGNORE_DIRS], "patient")
+def load_data(datadir):
+    patients = list_patients(datadir)
+    patient_id = select(patients, "patient")
     patdir = os.path.join(datadir, patient_id)
 
     patient = None
@@ -111,12 +135,20 @@ def select_series(datadir):
         study = patient.add_study(Study(d))
         series = study.add_series(Series(d))
         _ = series.add_instance(Instance(d, fpath))
+    return patient
 
+
+def select_study(datadir, label="study"):
+    patient = load_data(datadir)
     print(patient)
-    study = select(list(patient.studies.values()), "study")
-    print()
+    study = select(patient.list_studies(), label)
 
-    series = select(list(study.series.values()), "series")
+    return study
+
+
+def select_series(datadir, label="series"):
+    study = select_study(datadir)
+    series = select(study.list_series(), label)
     print()
 
     return series
